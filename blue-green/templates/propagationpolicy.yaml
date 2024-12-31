@@ -8,17 +8,21 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   resourceSelectors:
-    - apiVersion: argoproj.io/v1alpha1
-      kind: Rollout
-      name: {{ template "helm-guestbook.fullname" . }}
     - apiVersion: v1
       kind: Service
       name: {{ template "helm-guestbook.fullname" . }}
-    #- apiVersion: apps/v1
-    #  kind: ReplicaSet
-    #  labelSelector:
-    #    matchLabels:
-    #      app: rollouts-demo
+    {{- if .Values.rollout }}
+    - apiVersion: argoproj.io/v1alpha1
+      kind: Rollout
+      name: {{ template "helm-guestbook.fullname" . }}
+    {{- else }}
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      labelSelector:
+        matchLabels:
+          app: {{ template "helm-guestbook.name" . }}
+          release: {{ .Release.Name }}
+    {{- end }}
   placement:
     clusterAffinity:
       clusterNames:
