@@ -9,15 +9,26 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  revisionHistoryLimit: 3
+  revisionHistoryLimit: 2
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {}
+      - setWeight: 40
+      - pause: {duration: 10}
+      - setWeight: 60
+      - pause: {duration: 10}
+      - setWeight: 80
+      - pause: {duration: 10}
   selector:
     matchLabels:
       app: {{ template "helm-guestbook.name" . }}
       release: {{ .Release.Name }}
-  strategy:
-    blueGreen:
-      activeService: {{ template "helm-guestbook.fullname" . }}
-      previewService: {{ template "helm-guestbook.fullname" . }}-preview
+  #strategy:
+  #  blueGreen:
+  #    activeService: {{ template "helm-guestbook.fullname" . }}
+  #    previewService: {{ template "helm-guestbook.fullname" . }}-preview
   template:
     metadata:
       labels:
