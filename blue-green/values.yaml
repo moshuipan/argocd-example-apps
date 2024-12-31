@@ -43,3 +43,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+rollout: true
+SchedulingType: Divided
+karmadaWeight: 1
