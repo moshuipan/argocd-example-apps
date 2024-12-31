@@ -1,0 +1,30 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: guestbook
+spec:
+  resourceSelectors:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: guestbook-ui
+    - apiVersion: v1
+      kind: Service
+      name: guestbook-ui
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - k8s1
+        - karmada
+    replicaScheduling:
+      replicaSchedulingType: Divided
+      replicaDivisionPreference: Weighted
+      weightPreference:
+        staticWeightList:
+        - targetCluster:
+            clusterNames:
+            - k8s1
+          weight: 100
+        - targetCluster:
+            clusterNames:
+            - karmada
+          weight: 1
