@@ -1,0 +1,43 @@
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: {{ template "helm-guestbook.fullname" . }}
+  labels:
+    app: {{ template "helm-guestbook.name" . }}
+    chart: {{ template "helm-guestbook.chart" . }}
+    release: {{ .Release.Name }}
+spec:
+  resourceSelectors:
+    - apiVersion: argoproj.io/v1alpha1
+      kind: Rollout
+      name: {{ template "helm-guestbook.fullname" . }}
+    - apiVersion: v1
+      kind: Service
+      name: {{ template "helm-guestbook.fullname" . }}
+    #- apiVersion: apps/v1
+    #  kind: ReplicaSet
+    #  labelSelector:
+    #    matchLabels:
+    #      app: rollouts-demo
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - k8s1
+        - karmada
+    replicaScheduling:
+      {{- if .Values.SchedulingType }}
+      replicaSchedulingType: Divided
+      replicaDivisionPreference: Weighted
+      weightPreference:
+        staticWeightList:
+        - targetCluster:
+            clusterNames:
+            - k8s1
+          weight: 100
+        - targetCluster:
+            clusterNames:
+            - karmada
+          weight: {{ .Values.karmadaWeight }}
+      {{- else }}
+      replicaSchedulingType: Duplicated
+      {{- end }}
